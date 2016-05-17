@@ -1,0 +1,111 @@
+<html>
+	<head>
+		<title>eDuck temperature</title>
+		<meta charset="utf-8">
+		<script src="jquery-ui-1.11.4.custom/jquery-1.11.3.min.js"></script>
+		<script src="jquery-ui-1.11.4.custom/jquery-ui.js"></script>
+		<link rel="stylesheet" href="jquery-ui-1.11.4.custom/jquery-ui.css">
+		<link rel="stylesheet" href="css/style.css">
+		<style>
+			.test{
+				/*border:1px solid #000;*/
+				width:800px;
+				height:400px;
+			}
+			.bgThermometer{
+				background-image: url("img/thermometer.gif");
+				background-repeat: no-repeat;
+				background-position: center; 
+				width:700px;
+				height:400px;
+				border:1px solid #000;
+			}
+			
+			.textAlignVer{ 
+				display:block;  
+				-webkit-transform: rotate(-90deg);   
+				-moz-transform: rotate(-90deg);   
+				transform: rotate(-90deg);   
+				position:relative;  
+				width:20px;  
+				white-space:nowrap;  
+				font-size:12px;  
+				margin-bottom:10px;  
+			}  
+			.DEBUG_Border{border:1px solid #000;}
+		</style>
+		<script>
+		var tempo_01 = 0;
+		$(function(){
+			setInterval(function(){
+				var thermo_json=$.getJSON("https://api.thingspeak.com/channels/62976/feeds/last"
+									,function(result){
+										$.each(result, function(i, field){
+										$("#temp_01").html(field + "°C");
+										tempo_01 = field;
+									});
+								});
+
+				$("#thermo_glass").height(tempo_01+"%");
+			},1000);
+			
+			$( "#slider-range" ).slider({
+						range: true,
+						min: 0,
+						max: 100,
+						values: [ 20, 65 ],
+						slide: function( event, ui ) {
+							$( "#amount" ).val(  ui.values[ 0 ] + " <-> " + ui.values[ 1 ] +"°C");
+						}
+			});
+			$( "#amount" ).val( $( "#slider-range" ).slider( "values", 0 ) +" <-> " + $( "#slider-range" ).slider( "values", 1 ) +"°C");
+		});
+		</script>
+	</head>
+	<body>
+<!-------------------------------->
+<!--widget thermometer			-->
+<!-- 							-->
+
+		<div class="ui-accordion ui-widget ui-helper-reset test">
+			<h3 class="ui-accordion-header ui-state-default ui-accordion-icons ui-corner-all">Thermometer</h3>
+			<div style="padding:5px" >
+				<div style="width:330px;float:left" class="">
+					<div class="" style="float:left; width:196px; background-color:#E3F6CE;">
+						
+						<h3 class="ui-accordion-header ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" style="height:15px;font-size:8px">Temperature setting</h3>
+						<div style="padding:3px 3px 20px 3px">
+							<p>
+								<input type="text" id="amount" readonly style="border:0; color:#f6931f;font-size:12px;margin-left:50px;background-color:#E3F6CE;">
+							</p>
+							<div id="slider-range"></div>
+						</div>
+						
+						<h3 class="ui-accordion-header ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" style="height:15px;font-size:8px">Alert setting</h3>
+						<div style="padding:3px 3px 20px 3px">
+							<p>
+								
+							</p>
+						</div>
+					</div>
+					<div class="donation-meter" style="float:right; ">
+						<span class="glass">
+							<span class="amount" style="height: 36%"id="thermo_glass"></span>
+							<strong class="total textAlignVer" style="bottom: 30%" id="temp_01"></strong>
+						</span>
+						<div class="bulb">
+							<span class="red-circle"></span>
+							<span class="filler">
+								<span></span>
+							</span>
+						</div>
+					</div>
+				</div>
+				<div style="float:right">
+					<iframe width="450" height="260" style="border: 1px solid #cccccc;" src="http://api.thingspeak.com/channels/62976/charts/1?width=450&height=260&results=60&dynamic=true" ></iframe>
+				</div>
+			</div>
+		</div>
+		
+	</body>
+</html>

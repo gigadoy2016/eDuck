@@ -1,0 +1,138 @@
+body {
+  font-family: Helvetica;
+}
+
+.donation-meter {
+  margin-left: 30px;
+  width: 100px;
+}
+.donation-meter .glass {
+  background: #e5e5e5;
+  border-radius: 100px 100px 0 0;
+  display: block;
+  height: 300px;
+  margin: 0 35px 10px;
+  padding: 5px;
+  position: relative;
+  width: 20px;
+}
+.donation-meter .amount {
+  background: #f34e54;
+  border-radius: 100px;
+  display: block;
+  width: 20px;
+  position: absolute;
+  bottom: 5px;
+}
+.donation-meter strong {
+  display: block;
+  text-align: center;
+}
+.donation-meter .goal {
+  font-size: 30px;
+}
+.donation-meter .total {
+  font-size: 16px;
+  position: absolute;
+  right: 35px;
+}
+
+.bulb {
+  background: #e5e5e5;
+  border-radius: 100px;
+  display: block;
+  height: 50px;
+  margin: 0 35px 10px;
+  padding: 5px;
+  position: relative;
+  top: -20px;
+  right: 15px;
+  width: 50px;
+}
+.bulb .red-circle {
+  background: #f34e54;
+  border-radius: 100px;
+  display: block;
+  height: 50px;
+  width: 50px;
+}
+.bulb .filler {
+  background: #f34e54;
+  border-radius: 100px 100px 0 0;
+  display: block;
+  height: 30px;
+  width: 20px;
+  position: relative;
+  top: -65px;
+  right: -15px;
+  z-index: 30;
+}
+.bgThermometer{
+	background-image: url("img/thermometer.gif");
+	background-repeat: no-repeat;
+	background-position: center; 
+	width:700px;
+	height:400px;
+	border:1px solid #000;
+}
+.textAlignVer{ 
+	display:block;  
+	-webkit-transform: rotate(-90deg);   
+	-moz-transform: rotate(-90deg);   
+	transform: rotate(-90deg);   
+	position:relative;  
+	width:20px;  
+	white-space:nowrap;  
+	font-size:12px;  
+	margin-bottom:10px;  
+}  
+/*****************************************************
+		Swtich
+		code by https://proto.io/freebies/onoff/
+*****************************************************/
+
+.onoffswitch {
+    position: relative; width: 90px;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+}
+.onoffswitch-checkbox {
+    display: none;
+}
+.onoffswitch-label {
+    display: block; overflow: hidden; cursor: pointer;
+    border: 2px solid #999999; border-radius: 20px;
+}
+.onoffswitch-inner {
+    display: block; width: 200%; margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+.onoffswitch-inner:before, .onoffswitch-inner:after {
+    display: block; float: left; width: 50%; height: 30px; padding: 0; line-height: 30px;
+    font-size: 14px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+    box-sizing: border-box;
+}
+.onoffswitch-inner:before {
+    content: "";
+    padding-left: 10px;
+    background-color: #34A7C1; color: #FFFFFF;
+}
+.onoffswitch-inner:after {
+    content: "";
+    padding-right: 10px;
+    background-color: #EEEEEE; color: #999999;
+    text-align: right;
+}
+.onoffswitch-switch {
+    display: block; width: 18px; margin: 6px;
+    background: #FFFFFF;
+    position: absolute; top: 0; bottom: 0;
+    right: 56px;
+    border: 2px solid #999999; border-radius: 20px;
+    transition: all 0.3s ease-in 0s; 
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+    margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    right: 0px; 
+}
