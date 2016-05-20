@@ -6,7 +6,7 @@
 *		switch by https://proto.io/freebies/onoff/
 */
  
- 	$range = file('led.txt');		// อ่านค่าเงื่อนไขถ่าน text file
+ 	$range = file('led.json');		// อ่านค่าเงื่อนไขถ่าน text file
 
 ?>
 <html>
