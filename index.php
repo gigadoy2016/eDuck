@@ -13,10 +13,13 @@
 	<head>
 		<title>eDuck temperature</title>
 		<meta charset="utf-8">
-		<script src="jquery-ui-1.11.4.custom/jquery-1.11.3.min.js"></script>
-		<script src="jquery-ui-1.11.4.custom/jquery-ui.js"></script>
-		<link rel="stylesheet" href="jquery-ui-1.11.4.custom/jquery-ui.css">
+		<script src="lib/js/jquery-ui-1.11.4.custom/jquery-1.11.3.min.js"></script>
+		<script src="lib/js/jquery-ui-1.11.4.custom/jquery-ui.js"></script>
+		<script src="lib/js/scriptMQTT.js"></script>
+		<link rel="stylesheet" href="lib/js/jquery-ui-1.11.4.custom/jquery-ui.css">
 		<link rel="stylesheet" href="css/style.css">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<script type="text/javascript" src="lib/js/bootstrap.min.js"></script>
 		<style>
 			.test{
 				/*border:1px solid #000;*/
@@ -24,13 +27,30 @@
 				height:400px;
 			}
 
-			.DEBUG_Border{border:0px solid #000;}
-			
+			.DEBUG_Border	{border:0px solid #000;}
+			.style_1		{font-size: 10px}
+
+			#statusMQTT.connect 	{background: #E18C1A;color: #FFF;}
+			#statusMQTT.connected 	{background: #00AE04;color: #FFF;}
+
+			h3		{height:40px;font-size:11px}
+			td		{padding: 2px;}
 		</style>
+
+
 		<script>
 		var tempo_01 = 0;
 		var switch_01 = 0;
 		var APIKey = "OJDJI20NWYIRFWWB"; 			//thinkSpeak.com
+		var Time_1 = 0;
+		var messageSubscrip;
+
+		var config = {
+			mqtt_server: "m11.cloudmqtt.com",
+			mqtt_websockets_port: 35507,
+			mqtt_user: "pitbull",
+			mqtt_password: "123456789"
+		};
 		
 		var jqxhr = $.getJSON( "tempControl.php", function( jsonData ) {
 			$( "#slider-range" ).slider({
@@ -41,8 +61,37 @@
 		});
 		
 		$(function(){
+			client = new Paho.MQTT.Client(config.mqtt_server, config.mqtt_websockets_port, "web_" + parseInt(Math.random() * 100, 10));
+			client.connect({
+				useSSL: true,
+				userName: config.mqtt_user,
+				password: config.mqtt_password,
+				onSuccess: function() {			// Once a connection has been made, make a subscription and send a message.
+					console.log("onConnect");
+					$("#statusMQTT").text("Ready").removeClass().addClass("btn btn-success");
+					client.subscribe("/FARM_1/LED01/");
+					//mqttSend("/FARM_1/LED01/", "onAIR");
+				},
+				onFailure: function(e) {
+					$("#status").text("Error : " + e).removeClass().addClass("error");
+			 		console.log(e);
+				}
+			});
+
+			client.onMessageArrived = function(message) {
+				messageSubscrip = JSON.parse(message.payloadString);
+				console.log(message.payloadString);
+
+				if (messageSubscrip.led1 != null ) {
+						$("#statusDevice").text("Ready").removeClass().addClass("btn btn-success");
+						onOffSwitch(message.payloadString);
+						Time_1 = Date.now();
+				}else{
+					console.log("Error MQTT Message");
+				}
+			}
+
 			//$("#test").html($( "#amount" ).val());
-			
 			setInterval(function(){
 				$.get( "https://api.thingspeak.com/channels/62976/fields/1/last",function(data){
 					tempo_01 = data;
@@ -64,6 +113,16 @@
 			});
 			
 			adjustControl();
+
+			setInterval(function(){
+				var resume = Date.now() - Time_1;
+				if(resume < 10000){
+					//alert(resume);
+					$("#statusDevice").text("Ready").removeClass().addClass("btn btn-success");
+				}else
+					$("#statusDevice").text("Warning").removeClass().addClass("btn btn-warning");
+			},5000);
+
 		});
 		
 		function controlTemporature(){
@@ -84,8 +143,16 @@
 		function adjustControl(){
 			$( "#amount" ).val( $( "#slider-range" ).slider( "values", 0 ) +" <-> " + $( "#slider-range" ).slider( "values", 1 ) +"ºC");
 			$("#myonoffswitch").prop( "checked", switch_01 );
-			
 		}
+
+		function onOffSwitch(data){
+			var obj = JSON.parse(data);
+			$("#testB").text(obj.led1);
+			$("#myonoffswitch").prop( "checked", obj.led1 );
+
+		}
+
+		
 		
 		
 		</script>
@@ -100,8 +167,21 @@
 			<div style="padding:5px" >
 				<div style="width:330px;float:left;" class="DEBUG_Border">
 					<div class="" style="float:left; width:196px; background-color:#E3F6CE;" class="DEBUG_Border">
-						
-						<h3 class="ui-accordion-header ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" style="height:15px;font-size:8px">Temperature setting</h3>
+						<h3 class="ui-accordion-header ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" >Status</h3>
+						<div style="padding:3px 3px 20px 3px" class="DEBUG_Border">
+							<table class="style_1">
+								<tr>
+									<td>MQTT Broker : </td>
+									<td><button type="button" id="statusMQTT" class="btn btn-warning">Warning</button></td>
+								</tr>
+								<tr>
+									<td>Device 1:</td>
+									<td><button type="button" id="statusDevice" class="btn btn-warning">Warning</button></td>
+								</tr>
+							</table>
+
+						</div>
+						<h3 class="ui-accordion-header ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" style="font-size:14px">Temperature setting</h3>
 						<div style="padding:3px 3px 20px 3px" class="DEBUG_Border">
 							<p>
 								<input type="text" id="amount" readonly style="border:0; color:#f6931f;font-size:12px;margin-left:50px;background-color:#E3F6CE;width:100px">
@@ -109,7 +189,7 @@
 							<div id="slider-range"></div>
 						</div>
 					<!-- Alert Setting panel -->						
-						<h3 class="ui-accordion-header ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons" style="height:15px;font-size:8px">LED light Display</h3>
+						<h3 class="ui-accordion-header ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons">LED light Display</h3>
 						<!-- onoffswitch -->						
 						<div style="height:80px;padding:3px;">
 							<div class="onoffswitch" style="margin-top:20px;margin-left:45px ">
@@ -146,6 +226,8 @@ https://thingspeak.com/channels/62976
 				</div>
 			</div>
 		</div>
-		<div id="test"></div>
+		<div id="test">
+			<button type="button" id="testB" class="btn btn-warning">Warning</button>
+		</div>
 	</body>
 </html>
