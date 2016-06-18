@@ -1,11 +1,11 @@
 <?
-/*	
+/*
 *		create by Xanio
 *		date 10/11/2015
-*		
+*
 *		switch by https://proto.io/freebies/onoff/
 */
- 
+
  	$range = file('led.json');		// อ่านค่าเงื่อนไขถ่าน text file
 
 ?>
@@ -48,10 +48,11 @@
 		var config = {
 			mqtt_server: "m11.cloudmqtt.com",
 			mqtt_websockets_port: 35507,
-			mqtt_user: "pitbull",
-			mqtt_password: "123456789"
+			mqtt_user: "monitor",
+			mqtt_password: "123456789",
+			mqtt_topic: "DEVICE/01/status/"
 		};
-		
+
 		var jqxhr = $.getJSON( "tempControl.php", function( jsonData ) {
 			$( "#slider-range" ).slider({
 				values: [jsonData['t1'] ,jsonData['t2']],
@@ -59,9 +60,9 @@
 			switch_01 = jsonData['led1'];
 			adjustControl();
 		});
-		
+
 		$(function(){
-			client = new Paho.MQTT.Client(config.mqtt_server, config.mqtt_websockets_port, "web_" + parseInt(Math.random() * 100, 10));
+      var client = new Paho.MQTT.Client(config.mqtt_server, config.mqtt_websockets_port, "test");
 			client.connect({
 				useSSL: true,
 				userName: config.mqtt_user,
@@ -69,11 +70,12 @@
 				onSuccess: function() {			// Once a connection has been made, make a subscription and send a message.
 					console.log("onConnect");
 					$("#statusMQTT").text("Ready").removeClass().addClass("btn btn-success");
-					client.subscribe("/FARM_1/LED01/");
-					//mqttSend("/FARM_1/LED01/", "onAIR");
+					client.subscribe(config.mqtt_topic);
+
 				},
 				onFailure: function(e) {
 					$("#status").text("Error : " + e).removeClass().addClass("error");
+          console.log("MQTT Connection losed");
 			 		console.log(e);
 				}
 			});
@@ -82,14 +84,20 @@
 				messageSubscrip = JSON.parse(message.payloadString);
 				console.log(message.payloadString);
 
-				if (messageSubscrip.led1 != null ) {
+				if (messageSubscrip.led_01 != null ) {
 						$("#statusDevice").text("Ready").removeClass().addClass("btn btn-success");
 						onOffSwitch(message.payloadString);
 						Time_1 = Date.now();
-				}else{
-					console.log("Error MQTT Message");
 				}
 			}
+
+      // called when the client loses its connection
+      client.onConnectionLost = function(responseObject){
+        if (responseObject.errorCode !== 0) {
+          console.log("onConnectionLost:"+responseObject.errorMessage);
+          console.reconnect();
+        }
+      }
 
 			//$("#test").html($( "#amount" ).val());
 			setInterval(function(){
@@ -107,16 +115,16 @@
 						values: [25 ,50],
 						slide: function( event, ui ) {	controlTemporature();	}
 			});
-			
+
 			$("#myonoffswitch").click(function(){
 				controlTemporature();
 			});
-			
+
 			adjustControl();
 
 			setInterval(function(){
 				var resume = Date.now() - Time_1;
-				if(resume < 10000){
+				if(resume < 15000){
 					//alert(resume);
 					$("#statusDevice").text("Ready").removeClass().addClass("btn btn-success");
 				}else
@@ -124,22 +132,22 @@
 			},5000);
 
 		});
-		
+
 		function controlTemporature(){
 			var value = $( "#slider-range" ).slider( "option", "values" );
-			
-			
+
+
 			if ($("#myonoffswitch").is(':checked')){
 				switch_01 = 1;
 			}else{
 				switch_01 = 0;
 			}
-			
+
 			$( "#amount" ).val(  value[ 0 ] + " <-> " + value[ 1 ] +"°C");
 			$.get( "tempControl.php", { t1: value[ 0 ], t2: value[ 1 ] ,'led1':switch_01} );
-			
+
 		}
-		
+
 		function adjustControl(){
 			$( "#amount" ).val( $( "#slider-range" ).slider( "values", 0 ) +" <-> " + $( "#slider-range" ).slider( "values", 1 ) +"ºC");
 			$("#myonoffswitch").prop( "checked", switch_01 );
@@ -147,14 +155,11 @@
 
 		function onOffSwitch(data){
 			var obj = JSON.parse(data);
-			$("#testB").text(obj.led1);
-			$("#myonoffswitch").prop( "checked", obj.led1 );
-
+			$("#ledStatus").text(obj.led_01);
+			$("#myonoffswitch").prop( "checked", obj.led_01 );
 		}
 
-		
-		
-		
+
 		</script>
 	</head>
 	<body>
@@ -188,9 +193,9 @@
 							</p>
 							<div id="slider-range"></div>
 						</div>
-					<!-- Alert Setting panel -->						
+					<!-- Alert Setting panel -->
 						<h3 class="ui-accordion-header ui-state-default ui-accordion-header-active ui-state-active ui-corner-top ui-accordion-icons">LED light Display</h3>
-						<!-- onoffswitch -->						
+						<!-- onoffswitch -->
 						<div style="height:80px;padding:3px;">
 							<div class="onoffswitch" style="margin-top:20px;margin-left:45px ">
 								<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
@@ -199,9 +204,10 @@
 									<span class="onoffswitch-switch"></span>
 								</label>
 							</div>
+							<button type="button" id="ledStatus" class="btn btn-warning">0</button>
 						</div>
-						<!-- onoffswitch -->												
-					<!--End Alert Setting panel -->						
+						<!-- onoffswitch -->
+					<!--End Alert Setting panel -->
 					</div>
 					<div class="donation-meter" style="float:right; ">
 						<span class="glass">
@@ -216,9 +222,9 @@
 						</div>
 					</div>
 				</div>
-<!--  
+<!--
 
-https://thingspeak.com/channels/62976  
+https://thingspeak.com/channels/62976
 
 -->
 				<div style="float:right">
@@ -227,7 +233,7 @@ https://thingspeak.com/channels/62976
 			</div>
 		</div>
 		<div id="test">
-			<button type="button" id="testB" class="btn btn-warning">Warning</button>
+
 		</div>
 	</body>
 </html>

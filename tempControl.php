@@ -2,9 +2,9 @@
 require("lib/phpMQTT.php");
  $host 			= "m11.cloudmqtt.com"; 
  $port 			= 15507;
- $username 		= "ktbwgckp"; 
- $password 		= "xc_om3Hl4iYn"; 
- $topic 		="/FARM_1/LED01/";
+ $username 		= "monitor"; 
+ $password 		= "123456789"; 
+ $topic 		="DEVICE/01/command/";
 
 
 if(!(empty($_GET["t1"]) && empty($_GET["t2"]))){

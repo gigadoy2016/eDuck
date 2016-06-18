@@ -1,71 +1,30 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8">
-		<script src="jquery-ui-1.11.4.custom/jquery-1.11.3.min.js"></script>
-		<script src="jquery-ui-1.11.4.custom/jquery-ui.js"></script>
-		<link rel="stylesheet" href="jquery-ui-1.11.4.custom/jquery-ui.css">
-		<link rel="stylesheet" href="css/style.css">
-		
-		<style>
-.onoffswitch {
-    position: relative; width: 68px;
-    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
-}
-.onoffswitch-checkbox {
-    display: none;
-}
-.onoffswitch-label {
-    display: block; overflow: hidden; cursor: pointer;
-    height: 32px; padding: 0; line-height: 32px;
-    border: 2px solid #CCCCCC; border-radius: 32px;
-    background-color: #FFFFFF;
-    transition: background-color 0.3s ease-in;
-}
-.onoffswitch-label:before {
-    content: "";
-    display: block; width: 32px; margin: 0px;
-    background: #FFFFFF;
-    position: absolute; top: 0; bottom: 0;
-    right: 34px;
-    border: 2px solid #CCCCCC; border-radius: 32px;
-    transition: all 0.3s ease-in 0s; 
-}
-.onoffswitch-checkbox:checked + .onoffswitch-label {
-    background-color: #DB1C5F;
-}
-.onoffswitch-checkbox:checked + .onoffswitch-label, .onoffswitch-checkbox:checked + .onoffswitch-label:before {
-   border-color: #DB1C5F;
-}
-.onoffswitch-checkbox:checked + .onoffswitch-label:before {
-    right: 0px; 
-}
-		</style>
-<script>
-$(function(){
-	$("#myonoffswitch").prop( "checked", 1 );
-    $( "#slider-range" ).slider({
-      range: true,
-      min: 0,
-      max: 500,
-      values: [ 75, 300 ],
-      slide: function( event, ui ) {
-        $( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
-      }
-    });
-    $( "#amount" ).val( "$" + $( "#slider-range" ).slider( "values", 0 ) +
-      " - $" + $( "#slider-range" ).slider( "values", 1 ) );
-});
-</script>
-</head>
+	<head>
+			<meta charset="utf-8">
+			<link rel="stylesheet" href="css/style.css">
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+			<script>
+			$(function(){
+				var URL = "https://api.forecast.io/forecast/eca18d5d7064224fe871d0834b2c105d/13.9267169,100.5858786?callback=?";
+				var apiKey = 'eca18d5d7064224fe871d0834b2c105d';
+            var url = 'https://api.forecast.io/forecast/';
+            var lati = 13.9267169;
+            var longi =100.5858786;
+            var data;
+
+            //$.getJSON(url + apiKey + "/" + lati + "," + longi + "?callback=?", function(data) {
+						$.getJSON(URL, function(data) {
+              console.log(data);
+              $('#weather').html('and the temperature is: ' + data.currently.temperature);
+            });
+			});
+			</script>
+	</head>
 <body>
 
-<div class="onoffswitch">
-    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" >
-    <label class="onoffswitch-label" for="myonoffswitch"></label>
-</div>
-<div>
-	<div id="slider-range"></div>
+<div id="weather">
+
 </div>
 </body>
 </html>
